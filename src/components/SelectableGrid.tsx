@@ -1,8 +1,10 @@
 /* eslint-disable */
-import { useEffect, useRef, useState } from "react";
-
-const defaultTotalAmountElements = 150;
-const defaultElementsPerRow = 15;
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  DEFAULT_GRID_ELEMENTS_PER_ROW,
+  DEFAULT_TOTAL_AMOUNT_GRID_ELEMENTS,
+} from "../constants";
+import { getGridCellsRange, getPositionIndexesForGridCell } from "../helpers";
 
 type Props = {
   totalAmountElements?: number;
@@ -10,8 +12,8 @@ type Props = {
 };
 
 export default function SelectableGrid({
-  totalAmountElements = defaultTotalAmountElements,
-  elementsPerRow = defaultElementsPerRow,
+  totalAmountElements = DEFAULT_TOTAL_AMOUNT_GRID_ELEMENTS,
+  elementsPerRow = DEFAULT_GRID_ELEMENTS_PER_ROW,
 }: Props) {
   const gridRef = useRef<HTMLDivElement>(null);
   const isPressing = useRef<boolean>(false);
@@ -21,6 +23,7 @@ export default function SelectableGrid({
   useEffect(() => {
     function handleMouseDownEvent(e: MouseEvent) {
       isPressing.current = true;
+      document.body.style.cursor = "grabbing";
 
       if (e.target instanceof HTMLElement) {
         const gridCell = e.target.innerText;
@@ -35,6 +38,7 @@ export default function SelectableGrid({
 
     function handleMouseUpEvent() {
       isPressing.current = false;
+      document.body.style.cursor = "default";
       setSelectedGridCells([]);
     }
 
@@ -47,53 +51,56 @@ export default function SelectableGrid({
     };
   }, []);
 
-  function getPositionIndexesForGridCell(gridCell: number) {
-    const rowIndex = Math.ceil(gridCell / elementsPerRow) - 1;
-    const colIndex = Math.floor(gridCell % elementsPerRow || elementsPerRow) - 1;
-    return [rowIndex, colIndex];
-  }
-
-  function handleGridCellMouseEnter(gridCell: number) {
+  function handleGridCellMouseEnter(gridCellEntered: number) {
     if (!isPressing.current || typeof firstGridCell.current !== "number") return;
 
-    const [iRow, iCol] = getPositionIndexesForGridCell(firstGridCell.current);
-    const [jRow, jCol] = getPositionIndexesForGridCell(gridCell);
+    const firstCellIndexes = getPositionIndexesForGridCell({
+      gridCell: firstGridCell.current,
+      elementsPerRow,
+    });
 
-    const updatedSelectedGridCells = [] as number[];
+    const lastCellIndexes = getPositionIndexesForGridCell({
+      gridCell: gridCellEntered,
+      elementsPerRow,
+    });
 
-    for (let i = Math.min(iRow, jRow); i <= Math.max(iRow, jRow); i++) {
-      for (let j = Math.min(iCol, jCol); j <= Math.max(iCol, jCol); j++) {
-        const gridCellValue = i * elementsPerRow + j + 1;
-        updatedSelectedGridCells.push(gridCellValue);
-      }
-    }
+    const updatedSelectedGridCells = getGridCellsRange({
+      cellIndexes: {
+        first: firstCellIndexes,
+        last: lastCellIndexes,
+      },
+      elementsPerRow,
+    });
 
     setSelectedGridCells(updatedSelectedGridCells);
   }
 
-  const gridCells = [...Array(totalAmountElements)]
-    .map((_, i) => i + 1)
-    .map((n) => {
-      const isSelected = selectedGridCells.includes(n);
+  const cells = useMemo(
+    () => [...Array(totalAmountElements)].map((_, i) => i + 1),
+    [totalAmountElements]
+  );
 
-      return (
-        <div
-          key={n}
-          onMouseEnter={() => handleGridCellMouseEnter(n)}
-          style={{
-            height: "50px",
-            width: "50px",
-            border: "1px solid grey",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: isSelected ? "lightblue" : "initial",
-          }}
-        >
-          <span style={{ fontWeight: "bold" }}>{n}</span>
-        </div>
-      );
-    });
+  const gridCells = cells.map((n) => {
+    const isSelected = selectedGridCells.includes(n);
+
+    return (
+      <div
+        key={n}
+        onMouseEnter={() => handleGridCellMouseEnter(n)}
+        style={{
+          height: "50px",
+          width: "50px",
+          border: "1px solid grey",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: isSelected ? "lightblue" : "initial",
+        }}
+      >
+        <span style={{ fontWeight: "bold" }}>{n}</span>
+      </div>
+    );
+  });
 
   return (
     <div
