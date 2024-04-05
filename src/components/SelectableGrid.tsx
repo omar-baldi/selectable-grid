@@ -15,7 +15,7 @@ export default function SelectableGrid({
 }: Props) {
   const gridRef = useRef<HTMLDivElement>(null);
   const isPressing = useRef<boolean>(false);
-  const firstGridCellPressed = useRef<number | null>(null);
+  const firstGridCell = useRef<number | null>(null);
   const [selectedGridCells, setSelectedGridCells] = useState<number[]>([]);
 
   useEffect(() => {
@@ -27,8 +27,8 @@ export default function SelectableGrid({
         const isGridCellValid = !isNaN(+gridCell);
 
         if (isGridCellValid) {
-          firstGridCellPressed.current = +gridCell;
-          setSelectedGridCells([firstGridCellPressed.current]);
+          firstGridCell.current = +gridCell;
+          setSelectedGridCells([firstGridCell.current]);
         }
       }
     }
@@ -47,6 +47,30 @@ export default function SelectableGrid({
     };
   }, []);
 
+  function getPositionIndexesForGridCell(gridCell: number) {
+    const rowIndex = Math.ceil(gridCell / elementsPerRow) - 1;
+    const colIndex = Math.floor(gridCell % elementsPerRow || elementsPerRow) - 1;
+    return [rowIndex, colIndex];
+  }
+
+  function handleGridCellMouseEnter(gridCell: number) {
+    if (!isPressing.current || typeof firstGridCell.current !== "number") return;
+
+    const [iRow, iCol] = getPositionIndexesForGridCell(firstGridCell.current);
+    const [jRow, jCol] = getPositionIndexesForGridCell(gridCell);
+
+    const updatedSelectedGridCells = [] as number[];
+
+    for (let i = Math.min(iRow, jRow); i <= Math.max(iRow, jRow); i++) {
+      for (let j = Math.min(iCol, jCol); j <= Math.max(iCol, jCol); j++) {
+        const gridCellValue = i * elementsPerRow + j + 1;
+        updatedSelectedGridCells.push(gridCellValue);
+      }
+    }
+
+    setSelectedGridCells(updatedSelectedGridCells);
+  }
+
   const gridCells = [...Array(totalAmountElements)]
     .map((_, i) => i + 1)
     .map((n) => {
@@ -55,7 +79,7 @@ export default function SelectableGrid({
       return (
         <div
           key={n}
-          data-grid-cell={n}
+          onMouseEnter={() => handleGridCellMouseEnter(n)}
           style={{
             height: "50px",
             width: "50px",
