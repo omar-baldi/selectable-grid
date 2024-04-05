@@ -1,7 +1,12 @@
 import "./App.css";
+import SelectableGrid from "./components/SelectableGrid";
 
 function App() {
-  return <></>;
+  return (
+    <>
+      <SelectableGrid />
+    </>
+  );
 }
 
 export default App;
