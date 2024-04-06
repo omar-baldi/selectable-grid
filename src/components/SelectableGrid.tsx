@@ -86,6 +86,7 @@ export default function SelectableGrid({
     return (
       <div
         key={n}
+        data-testid={`grid-cell grid-cell-${n}`}
         onMouseEnter={() => handleGridCellMouseEnter(n)}
         style={{
           height: "50px",
