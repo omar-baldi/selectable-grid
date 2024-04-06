@@ -22,4 +22,15 @@ describe("SelectableGrid", () => {
     fireEvent.mouseDown(gridCellElement);
     expect(gridCellElement).toHaveStyle({ backgroundColor: "lightblue" });
   });
+
+  it("should not select grid cell when no grid cell has been pressed before entering", () => {
+    const wrapper = render(<SelectableGrid />);
+    const gridCellElement = wrapper.getByTestId("grid-cell grid-cell-49", {
+      exact: true,
+    });
+
+    expect(gridCellElement).toHaveStyle({ backgroundColor: "initial" });
+    fireEvent.mouseEnter(gridCellElement);
+    expect(gridCellElement).toHaveStyle({ backgroundColor: "initial" });
+  });
 });
