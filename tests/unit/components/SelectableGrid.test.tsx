@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import SelectableGrid from "../../../src/components/SelectableGrid";
 
 describe("SelectableGrid", () => {
@@ -9,5 +9,17 @@ describe("SelectableGrid", () => {
       exact: false,
     });
     expect(gridCellsElements.length).toBe(150);
+  });
+
+  it("should select grid cell when being pressed", () => {
+    const wrapper = render(<SelectableGrid />);
+    const gridCellElement = wrapper.getByTestId("grid-cell grid-cell-49", {
+      exact: true,
+    });
+
+    expect(gridCellElement).toBeInTheDocument();
+    expect(gridCellElement).toHaveStyle({ backgroundColor: "initial" });
+    fireEvent.mouseDown(gridCellElement);
+    expect(gridCellElement).toHaveStyle({ backgroundColor: "lightblue" });
   });
 });
