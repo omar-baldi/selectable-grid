@@ -4,7 +4,7 @@ import {
   DEFAULT_GRID_ELEMENTS_PER_ROW,
   DEFAULT_TOTAL_AMOUNT_GRID_ELEMENTS,
 } from "../constants";
-import { getGridCellsRange, getPositionIndexesForGridCell } from "../helpers";
+import { getGridCellsRange, getPositionIndexesForGridCell } from "../helpers/grid-cell";
 
 type Props = {
   totalAmountElements?: number;
