@@ -1,4 +1,7 @@
-import { getPositionIndexesForGridCell } from "../../../src/helpers/grid-cell";
+import {
+  getGridCellsRange,
+  getPositionIndexesForGridCell,
+} from "../../../src/helpers/grid-cell";
 
 describe("getPositionIndexesForGridCell", () => {
   it.each([
@@ -17,4 +20,18 @@ describe("getPositionIndexesForGridCell", () => {
       expect(indexCol).toBe(expectedIndexCol);
     }
   );
+});
+
+describe("getGridCellsRange", () => {
+  it("should throw error if cell indexes are not a pair array", () => {
+    expect(() => {
+      getGridCellsRange({
+        cellIndexes: {
+          first: [1],
+          last: [10, 2],
+        },
+        elementsPerRow: 15,
+      });
+    }).toThrow(new Error("Indexes need to be a pair"));
+  });
 });
